@@ -1,5 +1,13 @@
-import bodyParser from 'body-parser'
-import url from 'url'
+const bodyParser = require('body-parser')
+const url = require('url')
+
+
+const cors = function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE, PATH, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+};
 
 const queryReader = function (app) {
   app.use((req, res, next) => {
@@ -37,7 +45,8 @@ const contentReader = function (app) {
   app.use(bodyParser.urlencoded({ extended: false }));
 }
 
-export const download = function (app) {
+exports.download = function (app) {
+  app.use(cors);
   queryReader(app);
   contentReader(app);
 }
