@@ -3,10 +3,6 @@ const { Socket, Server } = io
 
 const sockets = { }
 
-const messageCallback = function (...args) {
-    console.log(args);
-}
-
 const getLoggedUsers = function (socket) {
     const users = Object.keys(sockets)
         .filter(a => a != socket.id)
@@ -14,15 +10,20 @@ const getLoggedUsers = function (socket) {
     socket.emit('logged-users', users);
 }
 
+const sendMessage = function (socket, message) {
+    if (sockets[message.target] === undefined) return;
+    sockets[message.target].socket.emit('received-message', message);
+}
+
 const changeNickname = function (socket = new Socket(), ...args) {
     sockets[socket.id].nickname = nickname;
-    console.log(`${socket.id} >> `, nickname);
     socket.emit('user-changed-nickname', { id: socket.id, nickname })
 }
 
 const socketListeners = function (socket = new Socket()) {
     socket.on('changed-nickname', (...args) => changeNickname.apply(null, [socket].concat(args)))
     socket.on('get-looged-users', () => getLoggedUsers(socket));
+    socket.on('send-message', (message) => sendMessage(socket, message));
 }
 
 const disconnection = function (listener = new Server(), socket = new Socket()) {
